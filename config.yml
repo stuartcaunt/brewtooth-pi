@@ -1,0 +1,11 @@
+thermometers:
+  - id: 1
+    port: 5
+    name: Thermometer Wire 1
+    is_port_valid: true
+  - id: 2
+    port: 6
+    name: Thermometer Wire 2
+    is_port_valid: false
+
+  
