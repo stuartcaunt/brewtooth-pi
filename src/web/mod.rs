@@ -1,14 +1,16 @@
-pub use root_resource::RootResource;
+pub use server::Server;
 
-mod root_resource;
+mod server;
+mod router;
+mod controllers;
 
 use crate::common::Configuration;
 
-pub struct Context {
+pub struct WebContext {
     configuration: Configuration,
 }
 
-impl Context {
+impl WebContext {
     pub fn new(configuration: Configuration) -> Self {
         Self {
             configuration: configuration
