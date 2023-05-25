@@ -2,8 +2,6 @@ use axum::{
     extract::{Extension, Path, Json},
     http::StatusCode
 };
-use std::sync::Arc;
-use tokio::sync::Mutex;
 
 use crate::web::*;
 use crate::web::dtos::ThermometerDto;
@@ -12,10 +10,9 @@ pub struct ThermometerController {
 }
 
 impl ThermometerController {
-    pub async fn get_thermometers(Extension(context): Extension<Arc<Mutex<WebContext>>>) -> Json<Vec<ThermometerDto>> {
-        let mut context = context.lock().await;
+    pub async fn get_thermometers(Extension(context): Extension<WebContext>) -> Json<Vec<ThermometerDto>> {
+        let thermometer_service = context.thermometer_service.lock().await;
 
-        let thermometer_service = &mut context.thermometer_service;
         let thermometers = thermometer_service.get_all();
 
         let thermometer_dtos = thermometers.iter()
@@ -26,11 +23,9 @@ impl ThermometerController {
     }
 
 
-    pub async fn get_thermometer(Path(id): Path<u32>,Extension(context): Extension<Arc<Mutex<WebContext>>>) -> Result<Json<ThermometerDto>, StatusCode> {
+    pub async fn get_thermometer(Path(id): Path<u32>,Extension(context): Extension<WebContext>) -> Result<Json<ThermometerDto>, StatusCode> {
+        let thermometer_service = context.thermometer_service.lock().await;
 
-        let mut context = context.lock().await;
-
-        let thermometer_service = &mut context.thermometer_service;
         if let Some(thermometer) = thermometer_service.get_by_id(id) {
             let thermometer_dto = ThermometerDto::new(thermometer);
 

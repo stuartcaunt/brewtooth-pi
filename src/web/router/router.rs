@@ -1,5 +1,3 @@
-use std::sync::Arc;
-use tokio::sync::Mutex;
 use axum::{
     routing::{get},
     Extension,
@@ -19,14 +17,14 @@ pub struct Router {
 
 impl Router{
 
-    pub fn router(web_context: Arc<Mutex<WebContext>>) -> AxumRouter {
+    pub fn router(web_context: WebContext) -> AxumRouter {
 
         AxumRouter::new()
             .nest(API_PREFIX, Router::api_router(web_context))
             .route("/", get(RootController::get_message))
     }
     
-    fn api_router(web_context: Arc<Mutex<WebContext>>) -> AxumRouter {
+    fn api_router(web_context: WebContext) -> AxumRouter {
 
         AxumRouter::new()
             .nest("/thermometers", ThermometerRouter::router())

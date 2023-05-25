@@ -16,9 +16,9 @@ impl Server {
         }
     }
 
-    pub async fn start(&self, configuration: Configuration, thermometer_service: ThermometerService) {
+    pub async fn start(&self, configuration: Configuration, thermometer_service: Arc<Mutex<ThermometerService>>) {
 
-        let web_context = Arc::new(Mutex::new(WebContext::new(configuration, thermometer_service)));
+        let web_context = WebContext::new(configuration, thermometer_service);
 
         let app = Router::router(web_context);
 

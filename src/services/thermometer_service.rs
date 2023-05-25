@@ -56,4 +56,8 @@ impl ThermometerService {
         // Return the thermometer wire
         self.get_by_id(id)
     }
+
+    pub fn read_temperatures(&mut self) {
+        println!("Reading temperatured from {} thermometers", self.thermometer_wires.len());
+    }
 }
