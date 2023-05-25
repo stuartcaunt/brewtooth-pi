@@ -1,5 +1,10 @@
+use std::sync::Arc;
+use tokio::sync::Mutex;
+
 use crate::web::router::Router;
 use crate::common::Configuration;
+use crate::web::WebContext;
+use crate::services::ThermometerService;
 
 pub struct Server {
 }
@@ -11,8 +16,11 @@ impl Server {
         }
     }
 
-    pub async fn start(&self, configuration: Configuration) {
-        let app = Router::router(configuration);
+    pub async fn start(&self, configuration: Configuration, thermometer_service: ThermometerService) {
+
+        let web_context = Arc::new(Mutex::new(WebContext::new(configuration, thermometer_service)));
+
+        let app = Router::router(web_context);
 
         // Run the server
         axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())

@@ -1,7 +1,7 @@
 use serde::{Serialize, Deserialize};
 use crate::common::*;
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct ThermometerWireConfig {
     pub id: u32,
     pub port: u32,
@@ -9,7 +9,7 @@ pub struct ThermometerWireConfig {
     pub is_port_valid: bool
 }
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct Configuration {
     pub thermometers: Vec<ThermometerWireConfig>,
     // pub mashControllers: Vec<MashControllerConfig>,
@@ -28,8 +28,8 @@ impl Configuration {
         }
     }
 
-    pub fn clear_thermometers(&mut self) {
-        self.thermometers.clear();
-    }
+    // pub fn clear_thermometers(&mut self) {
+    //     self.thermometers.clear();
+    // }
 
 }
