@@ -10,6 +10,7 @@ mod server;
 mod router;
 mod controllers;
 mod dtos;
+mod inputs;
 
 
 #[derive(Clone)]

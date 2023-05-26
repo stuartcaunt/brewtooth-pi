@@ -6,7 +6,6 @@ pub struct ThermometerWireConfig {
     pub id: u32,
     pub port: u32,
     pub name: String,
-    pub is_port_valid: bool
 }
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]

@@ -20,19 +20,18 @@ impl ThermometerService {
             .find(|&thermometer_wire| thermometer_wire.get_id() == id)
     }
 
-    pub fn add(&mut self, thermometer_wire_config: & ThermometerWireConfig) -> Option<&ThermometerWire> {
+    pub fn add(&mut self, thermometer_wire_config: &ThermometerWireConfig) -> Option<&ThermometerWire> {
         let mut thermometer_wire = ThermometerWire::new(thermometer_wire_config);
-        let id = thermometer_wire.get_id();
+        let mut id = thermometer_wire.get_id();
         if id == 0 {
             let max_id = self.thermometer_wires.iter()
                 .fold(0, |max, a_thermometer_wire| if a_thermometer_wire.get_id() > max { a_thermometer_wire.get_id() } else { max });
 
-            let next_id = max_id + 1;
+            id = max_id + 1;
             // LOG("Creating new thermometerWire with Id %d", nextAvailableId);
-            thermometer_wire.set_id(next_id);
+            thermometer_wire.set_id(id);
 
         } else {
-
             if let Some(existing_thermometer_index) = self.thermometer_wires.iter().position(|a_thermometer_wire| a_thermometer_wire.get_id() == id) {
                 // LOG("Thermometer with Id %d already exists: replacing it", thermometerWireConfig.id);
                 self.thermometer_wires.remove(existing_thermometer_index);

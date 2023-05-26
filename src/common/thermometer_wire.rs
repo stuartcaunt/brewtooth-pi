@@ -20,7 +20,7 @@ impl ThermometerWire {
             id: config.id,
             port: config.port,
             name: config.name.clone(),
-            is_port_valid: config.is_port_valid,
+            is_port_valid: false,
             is_temperature_reading: false,
             thermometers: Vec::new()
         }
