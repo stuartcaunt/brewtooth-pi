@@ -47,4 +47,27 @@ impl ThermometerController {
             Err(StatusCode::NOT_FOUND)
         }
     }
+
+    pub async fn update_thermometer(Path(id): Path<u32>, Extension(context): Extension<WebContext>, Json(req): Json<ThermometerInput>) -> Result<Json<ThermometerDto>, StatusCode> {
+        let mut thermometer_service = context.thermometer_service.lock().await;
+
+        if let Some(thermometer) = thermometer_service.update(id, &req.into()) {
+            let thermometer_dto = ThermometerDto::new(thermometer);
+
+            Ok(Json(thermometer_dto))
+        } else {
+            Err(StatusCode::NOT_FOUND)
+        }
+    }
+
+    pub async fn delete_thermometer(Path(id): Path<u32>, Extension(context): Extension<WebContext>) -> Result<String, StatusCode> {
+        let mut thermometer_service = context.thermometer_service.lock().await;
+
+        if thermometer_service.delete(id) {
+            Ok("Ok".to_string())
+
+        } else {
+            Err(StatusCode::NOT_FOUND)
+        }
+    }
 }

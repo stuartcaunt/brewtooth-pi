@@ -1,5 +1,5 @@
 use axum::{
-    routing::{get, post},
+    routing::{get, post, put, delete},
     Router,
 };
 
@@ -14,5 +14,7 @@ impl ThermometerRouter {
             .route("/", get(ThermometerController::get_thermometers))
             .route("/", post(ThermometerController::create_thermometer))
             .route("/:id", get(ThermometerController::get_thermometer))
+            .route("/:id", put(ThermometerController::update_thermometer))
+            .route("/:id", delete(ThermometerController::delete_thermometer))
     }
 }
