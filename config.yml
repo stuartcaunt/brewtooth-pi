@@ -1,4 +1,4 @@
-thermometer:
-  port: 4
-
+mash_controller:
+  heater_port: 23
+  agitator_port: 24
   

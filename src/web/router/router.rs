@@ -7,7 +7,7 @@ use axum::{
 use crate::web::controllers::RootController;
 use crate::web::*;
 
-use crate::web::router::{ConfigurationRouter, ThermometerRouter};
+use crate::web::router::{ConfigurationRouter, ThermometerRouter, MashControllerRouter};
 
 
 const API_PREFIX: &str = "/api";
@@ -28,6 +28,7 @@ impl Router{
 
         AxumRouter::new()
             .nest("/thermometers", ThermometerRouter::router())
+            .nest("/controller", MashControllerRouter::router())
             .nest("/configuration", ConfigurationRouter::router())
             .layer(Extension(web_context))
     }

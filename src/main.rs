@@ -3,7 +3,7 @@ use tokio::{task, sync::Mutex};
 
 use crate::common::Configuration;
 use crate::web::Server;
-use crate::services::ThermometerService;
+use crate::services::{ThermometerService, MashControllerService};
 
 mod common;
 mod web;
@@ -16,15 +16,19 @@ async fn main() {
     let configuration = Configuration::read("config.yml").expect("Failed to read the config file");
 
     // Create the thermometer service and initialise thermometer wires
-    let thermometer_service = match ThermometerService::new() {
-        Ok(thermometer_service) => thermometer_service,
-        Err(error) => {
-            println!("Failed to create thermometer service: {}", error);
-            std::process::exit(1);
-        }
-    };
+    let thermometer_service = ThermometerService::new().unwrap_or_else(|error| {
+        println!("Failed to create thermometer service: {}", error);
+        std::process::exit(1);
+    });
+
+    // Create the mash controller service and validate heater and agitator ports
+    let mash_controller_service = MashControllerService::new(&configuration.mash_controller).unwrap_or_else(|error| {
+        println!("Failed to create mash controller service: {}", error);
+        std::process::exit(1);
+    });
 
     let thermometer_service = Arc::new(Mutex::new(thermometer_service));
+    let mash_controller_service = Arc::new(Mutex::new(mash_controller_service));
     let running = Arc::new(std::sync::Mutex::new(true));
 
     // Start thread to regularly update the thermometers
@@ -41,7 +45,7 @@ async fn main() {
     });
 
     let server = Server::new();
-    server.start(configuration, thermometer_service).await;
+    server.start(configuration, thermometer_service, mash_controller_service).await;
 
     *running.lock().unwrap() = false;
     let _ = tokio::join!(task);

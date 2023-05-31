@@ -26,6 +26,8 @@ impl ThermometerWire {
     }
 
     pub fn read_temperatures(&mut self) {
+        println!("Reading temperatures from {} thermometers", self.thermometers.len());
+
         for thermometer in self.thermometers.iter_mut() {
             thermometer.read_temperature().unwrap_or_else(|error| {
                 println!("Failed to read temperature from thermometer {}: {}", thermometer.get_id(), error);
@@ -37,7 +39,13 @@ impl ThermometerWire {
         let files = match fs::read_dir(W1_PATH_PREFIX) {
             Ok(files) => files,
             Err(error) => {
-                return Err(BrewtoothError::SystemError(format!("The one-wire driver is not active ({})", error)));
+                let env = std::env::var("ENV").unwrap_or("PROD".to_string());
+                if env == "PROD" {
+                    return Err(BrewtoothError::SystemError(format!("The one-wire driver is not active ({})", error)));
+
+                } else {
+                    return Ok(Vec::new())
+                }
             }
         };
 

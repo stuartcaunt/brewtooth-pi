@@ -4,7 +4,7 @@ use tokio::sync::Mutex;
 use crate::web::router::Router;
 use crate::common::Configuration;
 use crate::web::WebContext;
-use crate::services::ThermometerService;
+use crate::services::{ThermometerService, MashControllerService};
 
 pub struct Server {
 }
@@ -16,9 +16,9 @@ impl Server {
         }
     }
 
-    pub async fn start(&self, configuration: Configuration, thermometer_service: Arc<Mutex<ThermometerService>>) {
+    pub async fn start(&self, configuration: Configuration, thermometer_service: Arc<Mutex<ThermometerService>>, mash_controller_service: Arc<Mutex<MashControllerService>>) {
 
-        let web_context = WebContext::new(configuration, thermometer_service);
+        let web_context = WebContext::new(configuration, thermometer_service, mash_controller_service);
 
         let app = Router::router(web_context);
 

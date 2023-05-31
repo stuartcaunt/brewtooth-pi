@@ -17,7 +17,6 @@ impl ThermometerService {
     }
 
     pub fn read_temperatures(&mut self) {
-        println!("Reading temperatures");
         self.thermometer_wire.read_temperatures();
     }
 }

@@ -2,8 +2,14 @@ use serde::{Serialize, Deserialize};
 use crate::common::*;
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
+pub struct MashControllerConfig {
+    pub heater_port: u8,
+    pub agitator_port: u8,
+}
+
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct Configuration {
-    // pub mashControllers: Vec<MashControllerConfig>,
+    pub mash_controller: MashControllerConfig,
 }
 
 impl Configuration {
