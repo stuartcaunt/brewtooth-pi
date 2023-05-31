@@ -16,10 +16,13 @@ async fn main() {
     let configuration = Configuration::read("config.yml").expect("Failed to read the config file");
 
     // Create the thermometer service and initialise thermometer wires
-    let mut thermometer_service = ThermometerService::new();
-    for thermometer_wire_config in configuration.thermometers.iter() {
-        thermometer_service.add(thermometer_wire_config);
-    }
+    let thermometer_service = match ThermometerService::new() {
+        Ok(thermometer_service) => thermometer_service,
+        Err(error) => {
+            println!("Failed to create thermometer service: {}", error);
+            std::process::exit(1);
+        }
+    };
 
     let thermometer_service = Arc::new(Mutex::new(thermometer_service));
     let running = Arc::new(std::sync::Mutex::new(true));

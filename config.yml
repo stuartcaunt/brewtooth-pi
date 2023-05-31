@@ -1,9 +1,4 @@
-thermometers:
-  - id: 1
-    port: 5
-    name: Thermometer Wire 1
-  - id: 2
-    port: 6
-    name: Thermometer Wire 2
+thermometer:
+  port: 4
 
   

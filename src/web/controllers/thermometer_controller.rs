@@ -1,73 +1,22 @@
 use axum::{
-    extract::{Extension, Path, Json},
-    http::StatusCode,
+    extract::{Extension, Json},
 };
 
 use crate::web::*;
-use crate::web::dtos::ThermometerDto;
-use crate::web::inputs::ThermometerInput;
+use crate::web::dtos::ThermometerWireDto;
 
 pub struct ThermometerController {
 }
 
 impl ThermometerController {
-    pub async fn get_thermometers(Extension(context): Extension<WebContext>) -> Json<Vec<ThermometerDto>> {
+    pub async fn get_thermometers(Extension(context): Extension<WebContext>) -> Json<ThermometerWireDto> {
         let thermometer_service = context.thermometer_service.lock().await;
 
-        let thermometers = thermometer_service.get_all();
+        let thermometer_wire = thermometer_service.get_thermometer_wire();
 
-        let thermometer_dtos = thermometers.iter()
-            .map(|thermometer| ThermometerDto::new(thermometer))
-            .collect();
+        let thermometer_dto = ThermometerWireDto::new(thermometer_wire);
 
-        Json(thermometer_dtos)
+        Json(thermometer_dto)
     }
 
-    pub async fn get_thermometer(Path(id): Path<u32>, Extension(context): Extension<WebContext>) -> Result<Json<ThermometerDto>, StatusCode> {
-        let thermometer_service = context.thermometer_service.lock().await;
-
-        if let Some(thermometer) = thermometer_service.get_by_id(id) {
-            let thermometer_dto = ThermometerDto::new(thermometer);
-
-            Ok(Json(thermometer_dto))
-        } else {
-            Err(StatusCode::NOT_FOUND)
-        }
-    }
-
-
-    pub async fn create_thermometer(Extension(context): Extension<WebContext>, Json(req): Json<ThermometerInput>) -> Result<Json<ThermometerDto>, StatusCode> {
-        let mut thermometer_service = context.thermometer_service.lock().await;
-
-        if let Some(thermometer) = thermometer_service.add(&req.into()) {
-            let thermometer_dto = ThermometerDto::new(thermometer);
-
-            Ok(Json(thermometer_dto))
-        } else {
-            Err(StatusCode::NOT_FOUND)
-        }
-    }
-
-    pub async fn update_thermometer(Path(id): Path<u32>, Extension(context): Extension<WebContext>, Json(req): Json<ThermometerInput>) -> Result<Json<ThermometerDto>, StatusCode> {
-        let mut thermometer_service = context.thermometer_service.lock().await;
-
-        if let Some(thermometer) = thermometer_service.update(id, &req.into()) {
-            let thermometer_dto = ThermometerDto::new(thermometer);
-
-            Ok(Json(thermometer_dto))
-        } else {
-            Err(StatusCode::NOT_FOUND)
-        }
-    }
-
-    pub async fn delete_thermometer(Path(id): Path<u32>, Extension(context): Extension<WebContext>) -> Result<String, StatusCode> {
-        let mut thermometer_service = context.thermometer_service.lock().await;
-
-        if thermometer_service.delete(id) {
-            Ok("Ok".to_string())
-
-        } else {
-            Err(StatusCode::NOT_FOUND)
-        }
-    }
 }
