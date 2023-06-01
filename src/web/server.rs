@@ -1,5 +1,4 @@
 use std::sync::Arc;
-use tokio::sync::Mutex;
 
 use crate::web::router::Router;
 use crate::common::Configuration;
@@ -16,7 +15,7 @@ impl Server {
         }
     }
 
-    pub async fn start(&self, configuration: Configuration, thermometer_service: Arc<Mutex<ThermometerService>>, mash_controller_service: Arc<Mutex<MashControllerService>>) {
+    pub async fn start(&self, configuration: Configuration, thermometer_service: Arc<ThermometerService>, mash_controller_service: Arc<MashControllerService>) {
 
         let web_context = WebContext::new(configuration, thermometer_service, mash_controller_service);
 

@@ -10,7 +10,9 @@ pub struct ThermometerController {
 
 impl ThermometerController {
     pub async fn get_thermometers(Extension(context): Extension<WebContext>) -> Json<ThermometerWireDto> {
-        let thermometer_service = context.thermometer_service.lock().await;
+        println!("waiting...");
+        let thermometer_service = context.thermometer_service;
+        println!("... done");
 
         let thermometer_wire = thermometer_service.get_thermometer_wire();
 

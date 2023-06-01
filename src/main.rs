@@ -1,5 +1,5 @@
 use std::{thread, time, sync::Arc};
-use tokio::{task, sync::Mutex};
+use tokio::task;
 
 use crate::common::Configuration;
 use crate::web::Server;
@@ -27,8 +27,8 @@ async fn main() {
         std::process::exit(1);
     });
 
-    let thermometer_service = Arc::new(Mutex::new(thermometer_service));
-    let mash_controller_service = Arc::new(Mutex::new(mash_controller_service));
+    let thermometer_service = Arc::new(thermometer_service);
+    let mash_controller_service = Arc::new(mash_controller_service);
     let running = Arc::new(std::sync::Mutex::new(true));
 
     // Start thread to regularly update the thermometers
@@ -38,9 +38,9 @@ async fn main() {
         // Loop while the web server is running
         while *running_clone.lock().unwrap() {
             thread::sleep(time::Duration::from_millis(1000));
-            let mut thermometer_service = thermometer_service_clone.lock().await;
+            // let thermometer_service = thermometer_service_clone.lock().await;
     
-            thermometer_service.read_temperatures();
+            thermometer_service_clone.read_temperatures();
         }
     });
 

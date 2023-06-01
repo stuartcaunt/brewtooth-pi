@@ -10,7 +10,7 @@ pub struct MashControllerController {
 
 impl MashControllerController {
     pub async fn get_mash_controller(Extension(context): Extension<WebContext>) -> Json<MashControllerDto> {
-        let mash_controller_service = context.mash_controller_service.lock().await;
+        let mash_controller_service = context.mash_controller_service;
 
         let mash_controller = mash_controller_service.get_mash_controller();
 

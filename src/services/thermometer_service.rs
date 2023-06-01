@@ -16,7 +16,7 @@ impl ThermometerService {
         &self.thermometer_wire
     }
 
-    pub fn read_temperatures(&mut self) {
+    pub fn read_temperatures(&self) {
         self.thermometer_wire.read_temperatures();
     }
 }

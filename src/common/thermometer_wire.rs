@@ -25,14 +25,15 @@ impl ThermometerWire {
         &self.thermometers
     }
 
-    pub fn read_temperatures(&mut self) {
-        println!("Reading temperatures from {} thermometers", self.thermometers.len());
+    pub fn read_temperatures(&self) {
+        println!("Reading temperatures from {} thermometers...", self.thermometers.len());
 
-        for thermometer in self.thermometers.iter_mut() {
+        for thermometer in self.thermometers.iter() {
             thermometer.read_temperature().unwrap_or_else(|error| {
                 println!("Failed to read temperature from thermometer {}: {}", thermometer.get_id(), error);
             });
         }
+        println!("... finished reading");
     }
 
     fn search() -> Result<Vec<Thermometer>> {
