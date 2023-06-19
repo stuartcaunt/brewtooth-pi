@@ -8,14 +8,14 @@ use crate::common::*;
 
 pub struct Thermometer {
     id: String,
-    temperature_mutex: Arc<Mutex<f32>>,
+    temperature: Arc<Mutex<f32>>,
 }
 
 impl Thermometer {
     pub fn new(id: &str) -> Self {
         Self {
             id: id.to_string(),
-            temperature_mutex: Arc::new(Mutex::new(0.0))
+            temperature: Arc::new(Mutex::new(0.0))
         }
     }
 
@@ -24,15 +24,15 @@ impl Thermometer {
     }
 
     pub fn get_temperature_c(&self) -> f32 {
-        let temperature_mutex = self.temperature_mutex.lock().unwrap();
+        let temperature = self.temperature.lock().unwrap();
 
-        *temperature_mutex
+        *temperature
     }
 
     pub fn set_temperature_c(&self, value: f32) {
-        let mut temperature_mutex = self.temperature_mutex.lock().unwrap();
+        let mut temperature = self.temperature.lock().unwrap();
 
-        *temperature_mutex = value;
+        *temperature = value;
     }
 
     pub fn read_temperature(&self) -> Result<()> {

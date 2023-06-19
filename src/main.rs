@@ -22,7 +22,7 @@ async fn main() {
     });
 
     // Create the mash controller service and validate heater and agitator ports
-    let mash_controller_service = MashControllerService::new(&configuration.mash_controller).unwrap_or_else(|error| {
+    let mash_controller_service = MashControllerService::new(&configuration.mash_controller, &thermometer_service).unwrap_or_else(|error| {
         println!("Failed to create mash controller service: {}", error);
         std::process::exit(1);
     });

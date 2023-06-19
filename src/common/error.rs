@@ -9,6 +9,7 @@ pub type Result<T> = result::Result<T, BrewtoothError>;
 
 #[derive(Debug)]
 pub enum BrewtoothError {
+    GpioError(rppal::gpio::Error),
     SystemError(String),
     IoError(std::io::Error),
     ConfigError(String),
@@ -20,8 +21,9 @@ impl Error for BrewtoothError {}
 impl fmt::Display for BrewtoothError {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
+            BrewtoothError::GpioError(error) => writeln!(formatter, "GpioError: {}", error),
             BrewtoothError::SystemError(message) => writeln!(formatter, "SystemError: {}", message),
-            BrewtoothError::IoError(err) => writeln!(formatter, "IoError: {}", err),
+            BrewtoothError::IoError(error) => writeln!(formatter, "IoError: {}", error),
             BrewtoothError::ConfigError(message) => writeln!(formatter, "ConfigError: {}", message),
             BrewtoothError::ParseError(message) => writeln!(formatter, "ParseError: {}", message),
         }
@@ -29,13 +31,19 @@ impl fmt::Display for BrewtoothError {
 }
 
 impl From<std::io::Error> for BrewtoothError {
-    fn from(err: std::io::Error) -> Self {
-        BrewtoothError::IoError(err)
+    fn from(error: std::io::Error) -> Self {
+        BrewtoothError::IoError(error)
     }
 }
 
 impl From<std::num::ParseIntError> for BrewtoothError {
-    fn from(err: std::num::ParseIntError) -> Self {
-        BrewtoothError::ParseError(err)
+    fn from(error: std::num::ParseIntError) -> Self {
+        BrewtoothError::ParseError(error)
+    }
+}
+
+impl From<rppal::gpio::Error> for BrewtoothError {
+    fn from(error: rppal::gpio::Error) -> Self {
+        BrewtoothError::GpioError(error)
     }
 }

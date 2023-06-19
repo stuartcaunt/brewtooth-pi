@@ -12,7 +12,7 @@ impl RelayDto {
     pub fn new(relay: &Relay) -> Self {
         Self {
             port: relay.get_port(),
-            is_active: relay.get_is_active(),
+            is_active: relay.is_active(),
         }
     }
 }

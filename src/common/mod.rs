@@ -1,9 +1,11 @@
-pub use configuration::{Configuration, MashControllerConfig};
+pub use configuration::{Configuration, MashControllerConfig, PIDConfig};
 pub use error::{BrewtoothError, Result};
 pub use thermometer::Thermometer;
 pub use thermometer_wire::ThermometerWire;
 pub use relay::Relay;
 pub use mash_controller::MashController;
+pub use pid_params::PIDParams;
+pub use temperature_control_state::{TemperatureControlState, ControlType};
 
 pub static W1_PATH_PREFIX: &str = "/sys/bus/w1/devices";
 
@@ -12,4 +14,6 @@ mod error;
 mod thermometer;
 mod thermometer_wire;
 mod relay;
+mod pid_params;
 mod mash_controller;
+mod temperature_control_state;

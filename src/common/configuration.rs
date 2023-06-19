@@ -2,9 +2,18 @@ use serde::{Serialize, Deserialize};
 use crate::common::*;
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
+pub struct PIDConfig {
+    pub kp: f32,
+    pub ki: f32,
+    pub kd: f32,
+    pub output_max: u32,
+}
+
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct MashControllerConfig {
     pub heater_port: u8,
     pub agitator_port: u8,
+    pub pid: PIDConfig,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
