@@ -6,9 +6,9 @@ use crate::common::{
     ThermometerWire,
     Relay,
     PIDParams,
-    PIDConfig,
-    TemperatureControlState,
     ControlType,
+    TemperatureControlState,
+    TemperatureProfile,
 };
 
 pub struct MashController {
@@ -114,20 +114,23 @@ impl MashController {
 
     pub fn get_pid_params(&self) -> PIDParams {
         let pid = self.pid.lock().unwrap();
-        return *pid;
+        pid.clone()
     }
 
     pub fn set_pid_params(&self, pid_params: &PIDParams) {
         let mut pid = self.pid.lock().unwrap();
-        return *pid = pid_params.clone();
+        pid.kp = pid_params.kp;
+        pid.ki = pid_params.ki;
+        pid.kd = pid_params.kd;
+        pid.output_max = pid_params.output_max;
     }
 
     pub fn get_temperature_control_state(&self) -> TemperatureControlState {
         let state = self.state.lock().unwrap();
-        *state
+        state.clone()
     }
 
-    pub fn set_setpoint_c(&mut self, setpoint_c: f32) {
+    pub fn set_setpoint_c(&self, setpoint_c: f32) {
         let mut state = self.state.lock().unwrap();
         state.setpoint_c = setpoint_c;
     }
@@ -137,14 +140,15 @@ impl MashController {
         state.setpoint_c
     }
 
+    pub fn set_temperature_profile(&self, temperature_profile: TemperatureProfile) {
+        let mut state = self.state.lock().unwrap();
+        state.temperature_profile = temperature_profile;
+    }
 
-    // void setTemperatureProfile(TemperatureProfile temperatureProfile) {
-    //     _state.temperatureProfile = temperatureProfile;
-    // }
-    
-    // TemperatureProfile getTemperatureProfile() const {
-    //     return _state.temperatureProfile;
-    // }
+    pub fn get_temperature_profile(&self) -> TemperatureProfile {
+        let state = self.state.lock().unwrap();
+        state.temperature_profile.clone()
+    }
 
     pub fn start_temperature_control(&self, control_type: ControlType) {
     

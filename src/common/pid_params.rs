@@ -1,6 +1,6 @@
 use crate::common::PIDConfig;
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct PIDParams {
     pub kp: f32,
     pub ki: f32,
