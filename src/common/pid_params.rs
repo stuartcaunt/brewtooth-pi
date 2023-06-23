@@ -5,7 +5,7 @@ pub struct PIDParams {
     pub kp: f32,
     pub ki: f32,
     pub kd: f32,
-    pub output_max: u32,
+    pub output_max: f32,
 }
 
 impl PIDParams {

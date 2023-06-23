@@ -1,4 +1,10 @@
 mash_controller:
   heater_port: 23
   agitator_port: 24
+  pid:
+    kp: 25.0
+    ki: 0.0001
+    kd: 1000.0
+    output_max: 100.0
+  window_size_ms: 20000
   

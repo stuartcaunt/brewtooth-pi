@@ -14,6 +14,7 @@ pub enum BrewtoothError {
     IoError(std::io::Error),
     ConfigError(String),
     ParseError(num::ParseIntError),
+    ControlError(String),
 }
 
 impl Error for BrewtoothError {}
@@ -26,6 +27,7 @@ impl fmt::Display for BrewtoothError {
             BrewtoothError::IoError(error) => writeln!(formatter, "IoError: {}", error),
             BrewtoothError::ConfigError(message) => writeln!(formatter, "ConfigError: {}", message),
             BrewtoothError::ParseError(message) => writeln!(formatter, "ParseError: {}", message),
+            BrewtoothError::ControlError(message) => writeln!(formatter, "ControlError: {}", message),
         }
     }
 }

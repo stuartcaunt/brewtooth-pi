@@ -1,4 +1,5 @@
 use std::sync::{Arc, Mutex};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::common::{
     Result, 
@@ -9,18 +10,35 @@ use crate::common::{
     ControlType,
     TemperatureControlState,
     TemperatureProfile,
+    PIDController,
 };
+
+const WINDOW_SAMPLE_TIME_RATIO: f32 = 0.25;
+
+struct ControllerTimer {
+    last_time_ms: u64,
+    start_time_ms: u64,
+    window_start_time_ms: u64,
+}
+
+impl ControllerTimer {
+    pub fn new() -> ControllerTimer {
+        Self {
+            last_time_ms: 0,
+            start_time_ms: 0,
+            window_start_time_ms: 0,
+        }
+    }
+}
 
 pub struct MashController {
     thermometer_wire: Arc<ThermometerWire>,
     heater: Relay,
     agitator: Relay,
     pid: Arc<Mutex<PIDParams>>,
-    // temperature_controller: PID,
+    temperature_controller: Arc<Mutex<Option<PIDController>>>,
     state: Arc<Mutex<TemperatureControlState>>,
-    last_time_ms: u64,
-    start_time_ms: u64,
-    window_start_time_ms: u64,
+    timer: Arc<Mutex<ControllerTimer>>,
 }
 
 impl MashController {
@@ -30,10 +48,13 @@ impl MashController {
             heater: Relay::new(mash_controller_config.heater_port)?,
             agitator: Relay::new(mash_controller_config.agitator_port)?,
             pid: Arc::new(Mutex::new(PIDParams::new(&mash_controller_config.pid))),
-            state: Arc::new(Mutex::new(TemperatureControlState::new())),
-            last_time_ms: 0,
-            start_time_ms: 0,
-            window_start_time_ms: 0
+            temperature_controller: Arc::new(Mutex::new(None)),
+            state: Arc::new(Mutex::new(TemperatureControlState {
+                window_size_ms: mash_controller_config.window_size_ms,
+                sample_time_ms: ((mash_controller_config.window_size_ms as f32) * WINDOW_SAMPLE_TIME_RATIO) as u32,
+                ..TemperatureControlState::defaults()
+            })),
+            timer: Arc::new(Mutex::new(ControllerTimer::new())),
         })
     }
 
@@ -102,12 +123,12 @@ impl MashController {
         pid.kd
     }
 
-    pub fn set_output_max(&self, output_max: u32) {
+    pub fn set_output_max(&self, output_max: f32) {
         let mut pid = self.pid.lock().unwrap();
         pid.output_max = output_max;
     }
 
-    pub fn get_output_max(&self) -> u32 {
+    pub fn get_output_max(&self) -> f32 {
         let pid = self.pid.lock().unwrap();
         pid.output_max
     }
@@ -151,40 +172,54 @@ impl MashController {
     }
 
     pub fn start_temperature_control(&self, control_type: ControlType) {
-    
-        // if (_temperatureController != NULL) {
-        //     LOG("Temperature control is already active");
-        //     return;
-        // }
-    
-        // if (_heater != NULL) {
-        //     // create temperature controller
-        //     LOG("Starting temperature control with control type %s", toString(controlType).c_str());
-        //     _state.setControlType(controlType);
-        //     _state.controllerOutput = 0.0;
-        //     _temperatureController = new PID(&_state.temperatureC, &_state.controllerOutput, &_state.setpointC, _config.pidParams.kp, _config.pidParams.ki, _config.pidParams.kd);
-        //     _temperatureController->setOutputLimits(0.0, _config.pidParams.outputMax);
-        //     this->setAutoTemperatureControl(true);
-    
-        //     _state.running = true;
-        //     _startTimeMs = millis();
-        //     _state.runTimeS = 0.0;
-    
-        //     // start the profile
-        //     if (controlType == ControlType::Profile) {
-        //         _state.setpointC= _state.temperatureProfile.start(0.001 * _startTimeMs, _state.temperatureC);
-        //     }
-    
-        //     _temperatureController->setSampleTime(_state.sampleTimeMs);
-    
-        // } else {
-        //     LOG("Cannot start temperature control since the heater is not configured");
-        // }
-    
+
+        let mut temperature_controller_option = self.temperature_controller.lock().unwrap();
+        if !temperature_controller_option.is_none() {
+            println!("Temperature control is already active");
+            return;
+        }
+
+        // create temperature controller
+        println!("Starting temperature control with control type {}", control_type.to_string());
+
+        {
+            let now_ms = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64;
+            let mut state = self.state.lock().unwrap();
+            state.running = true;
+            state.current_time_s = (now_ms / 1000) as f32;
+            state.run_time_s = 0.0;
+            state.temperature_c = self.get_temperature();
+            state.control_type = control_type;
+            state.controller_output = 0.0;
+            // start the profile
+            state.start_temperature_profile((now_ms / 1000) as f32);
+
+            let mut temperature_controller = PIDController::new();
+            let pid = self.pid.lock().unwrap();
+            temperature_controller.set_output_limits(0.0, pid.output_max);
+            temperature_controller.set_sample_time_ms(state.sample_time_ms);
+            *temperature_controller_option = Some(temperature_controller);
+
+            let mut timer = self.timer.lock().unwrap();
+            timer.start_time_ms = now_ms;
+        }
+
+
+        self.set_auto_temperature_control(true);
     }
     
     pub fn stop_temperature_control() {
 
+    }
+
+    pub fn set_auto_temperature_control(&self, auto: bool) {
+        let mut state = self.state.lock().unwrap();
+        state.auto_temperature_control = auto;
+
+        let temperature_controller_option = &mut *(self.temperature_controller.lock().unwrap());
+        if let Some(temperature_controller) = temperature_controller_option {
+            temperature_controller.set_auto_mode(auto);
+        }
     }
 
     pub fn start_temperature_control_profile_level() {
