@@ -14,7 +14,7 @@ pub struct MashControllerConfig {
     pub heater_port: u8,
     pub agitator_port: u8,
     pub pid: PIDConfig,
-    pub window_size_ms: u32,
+    pub window_size_ms: u64,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]

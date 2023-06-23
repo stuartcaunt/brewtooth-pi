@@ -1,4 +1,5 @@
 use std::fmt;
+use std::time::{SystemTime, UNIX_EPOCH};
 use crate::common::TemperatureProfile;
 
 #[derive(PartialEq, Eq, Clone)]
@@ -31,7 +32,6 @@ pub struct TemperatureControlState {
     pub auto_temperature_control: bool,
     pub loop_ms: u32,
     pub sample_time_ms: u32,
-    pub window_size_ms: u32,
 }
 
 impl TemperatureControlState {
@@ -50,25 +50,42 @@ impl TemperatureControlState {
             auto_temperature_control: false,
             loop_ms: 0,
             sample_time_ms: 0,
-            window_size_ms: 0,
         }
     }
 
-    pub fn start_temperature_profile(&mut self, time_s: f32) {
+    pub fn start_temperature_profile(&mut self) {
         if self.control_type == ControlType::Profile {
+            let time_s = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs_f32();
             self.setpoint_c = self.temperature_profile.start(time_s, self.temperature_c);
         }
     }
 
-    pub fn stop_temperature_profile(&mut self, time_s: f32) {
-        if self.control_type == ControlType::Profile {
+    pub fn stop_temperature_profile(&mut self) {
+        if self.running && self.control_type == ControlType::Profile {
             self.temperature_profile.stop();
         }
     }
 
-    pub fn update_temperature_profile(&mut self, time_s: f32) {
-        if self.control_type == ControlType::Profile {
+    pub fn update_temperature_profile(&mut self) {
+        if self.running && self.control_type == ControlType::Profile {
+            let time_s = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs_f32();
             self.setpoint_c = self.temperature_profile.update(time_s, self.temperature_c);
+        }
+    }
+
+    pub fn start_temperature_profile_pending_level(&mut self) {
+        if self.running && self.control_type == ControlType::Profile {
+            let time_s = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs_f32();
+
+            self.temperature_profile.start_pending_level(time_s, self.temperature_c);
+        }
+    }
+
+    pub fn terminate_temperature_profile_current_level(&mut self) {
+        if self.running && self.control_type == ControlType::Profile {
+            let time_s = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs_f32();
+
+            self.temperature_profile.terminate_current_level(time_s, self.temperature_c);
         }
     }
 

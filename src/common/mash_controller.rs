@@ -39,6 +39,7 @@ pub struct MashController {
     temperature_controller: Arc<Mutex<Option<PIDController>>>,
     state: Arc<Mutex<TemperatureControlState>>,
     timer: Arc<Mutex<ControllerTimer>>,
+    window_size_ms: u64,
 }
 
 impl MashController {
@@ -50,11 +51,11 @@ impl MashController {
             pid: Arc::new(Mutex::new(PIDParams::new(&mash_controller_config.pid))),
             temperature_controller: Arc::new(Mutex::new(None)),
             state: Arc::new(Mutex::new(TemperatureControlState {
-                window_size_ms: mash_controller_config.window_size_ms,
                 sample_time_ms: ((mash_controller_config.window_size_ms as f32) * WINDOW_SAMPLE_TIME_RATIO) as u32,
                 ..TemperatureControlState::defaults()
             })),
             timer: Arc::new(Mutex::new(ControllerTimer::new())),
+            window_size_ms: mash_controller_config.window_size_ms,
         })
     }
 
@@ -192,7 +193,7 @@ impl MashController {
             state.control_type = control_type;
             state.controller_output = 0.0;
             // start the profile
-            state.start_temperature_profile((now_ms / 1000) as f32);
+            state.start_temperature_profile();
 
             let mut temperature_controller = PIDController::new();
             let pid = self.pid.lock().unwrap();
@@ -208,8 +209,29 @@ impl MashController {
         self.set_auto_temperature_control(true);
     }
     
-    pub fn stop_temperature_control() {
+    pub fn stop_temperature_control(&self) {
+        {
+            let mut temperature_controller_option = self.temperature_controller.lock().unwrap();
+            // delete temperature controller
+            if temperature_controller_option.is_some() {
+                println!("Stopping/deleting temperature controller");
+                *temperature_controller_option = None;
+            }
+        }
 
+        {
+            let mut state = self.state.lock().unwrap();
+
+            state.controller_output = 0.0;
+            state.running = false;
+            state.run_time_s = 0.0;
+    
+            // stop the profile
+            state.stop_temperature_profile();
+        }
+
+        self.set_heater_active(false);
+        self.set_auto_temperature_control(false);
     }
 
     pub fn set_auto_temperature_control(&self, auto: bool) {
@@ -222,16 +244,66 @@ impl MashController {
         }
     }
 
-    pub fn start_temperature_control_profile_level() {
-
+    pub fn start_temperature_control_profile_level(&self) {
+        let mut state = self.state.lock().unwrap();
+        state.start_temperature_profile_pending_level();
     }
 
-    pub fn skip_temperature_control_profile_level() {
-
+    pub fn skip_temperature_control_profile_level(&self) {
+        let mut state = self.state.lock().unwrap();
+        state.terminate_temperature_profile_current_level();
     }
 
-    pub fn update() {
+    pub fn update(&self) {
+        let mut state = self.state.lock().unwrap();
+        let mut timer = self.timer.lock().unwrap();
 
+        // Update loop timing
+        let time_ms = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64;
+
+        state.loop_ms = (time_ms - timer.last_time_ms) as u32;
+        timer.last_time_ms = time_ms;
+
+        state.current_time_s = (time_ms / 1000) as f32;
+
+        // Get mean temperature from thermometer wires
+        state.temperature_c = self.get_temperature();
+        println!("Got average temperature of {}", state.temperature_c);
+
+        // Shift relay window
+        while (time_ms - timer.window_start_time_ms) > self.window_size_ms {
+            timer.window_start_time_ms += self.window_size_ms;
+        }
+        
+        // Update the profile
+        state.update_temperature_profile();
+
+        // Update runtime
+        state.run_time_s = (time_ms - timer.start_time_ms) as f32 * 0.001;
+
+        // Update temperate control
+        let temperature_controller_option = &mut *(self.temperature_controller.lock().unwrap());
+        if let Some(temperature_controller) = temperature_controller_option {
+
+            let pid = self.pid.lock().unwrap();
+            if let Ok(output) = temperature_controller.compute(state.temperature_c, state.setpoint_c, pid.kp, pid.ki, pid.kd) {
+                state.controller_output = output;
+
+                // Activate heater depending on controller output
+                let window_factor = (time_ms - timer.window_start_time_ms) as f32 / self.window_size_ms as f32;
+                let output_factor = state.controller_output as f32 / pid.output_max as f32;
+
+                let active_heater = output_factor >= window_factor;
+
+                if self.is_heater_active() != active_heater {
+                    println!("{} : Changing heater state to {}, wf = {}, of = {}", state.run_time_s, active_heater, window_factor * 100.0, output_factor * 100.0);
+                    self.set_heater_active(active_heater);
+                }
+            }
+        }
+
+        // Write data to file
+        // this->writeHistoryToFile();
     }
           
     // const String & getHistoryFileName() const {
