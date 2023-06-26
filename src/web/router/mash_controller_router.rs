@@ -1,5 +1,5 @@
 use axum::{
-    routing::get,
+    routing::{get, post},
     Router,
 };
 
@@ -12,5 +12,7 @@ impl MashControllerRouter {
     pub fn router() -> Router {
         Router::new()
             .route("/", get(MashControllerController::get_mash_controller))
+            .route("/pid", get(MashControllerController::get_pids))
+            .route("/pid", post(MashControllerController::get_pids))
     }
 }

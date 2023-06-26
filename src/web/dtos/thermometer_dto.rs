@@ -25,11 +25,7 @@ impl ThermometerDto {
 
 impl ThermometerWireDto {
     pub fn new(thermometer_wire: &ThermometerWire) -> Self {
-        let mut thermometers = Vec::new();
-        for thermometer in thermometer_wire.get_thermometers() {
-            thermometers.push(ThermometerDto::new(thermometer));
-
-        }
+        let thermometers = thermometer_wire.get_thermometers().iter().map(|thermometer| ThermometerDto::new(thermometer)).collect();
         Self {
             temperature: thermometer_wire.get_temperature(),
             thermometers: thermometers

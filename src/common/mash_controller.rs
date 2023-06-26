@@ -63,6 +63,14 @@ impl MashController {
         &self.heater
     }
 
+    pub fn get_thermometer_wire(&self) -> &Arc<ThermometerWire> {
+        &self.thermometer_wire
+    }
+
+    pub fn get_window_size_ms(&self) -> u64 {
+        self.window_size_ms
+    }
+
     pub fn set_heater_active(&self, active: bool) {
         if self.heater.is_active() != active {
             println!("Setting heater active {}", active);
@@ -139,12 +147,14 @@ impl MashController {
         pid.clone()
     }
 
-    pub fn set_pid_params(&self, pid_params: &PIDParams) {
+    pub fn set_pid_params(&self, pid_params: &PIDParams) -> PIDParams {
         let mut pid = self.pid.lock().unwrap();
         pid.kp = pid_params.kp;
         pid.ki = pid_params.ki;
         pid.kd = pid_params.kd;
         pid.output_max = pid_params.output_max;
+
+        self.get_pid_params()
     }
 
     pub fn get_temperature_control_state(&self) -> TemperatureControlState {
