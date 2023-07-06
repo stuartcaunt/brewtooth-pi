@@ -1,9 +1,5 @@
-use std::{
-    sync::{Arc, Mutex},
-    vec
-};
-
-#[derive(PartialEq, Eq, Clone)]
+use serde::{Serialize, Deserialize};
+#[derive(PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum ProfileState {
     Inactive,
     Pending,
@@ -11,8 +7,7 @@ pub enum ProfileState {
     Terminated
 }
 
-
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct TemperatureLevel {
     pub name: String,
     pub setpoint_c: f32,
@@ -25,17 +20,6 @@ pub struct TemperatureLevel {
 
 
 impl TemperatureLevel {
-    pub fn new() -> TemperatureLevel {
-        TemperatureLevel { 
-            name: "".to_string(), 
-            setpoint_c: 0.0, 
-            tolerance_c: 0.0, 
-            duration_s: 0.0, 
-            timer_s: 0.0, 
-            start_time_s: 0.0, 
-            state: ProfileState::Inactive, 
-        }
-    }
 
     pub fn init(&mut self, tolerance_c: f32) {
         self.tolerance_c = tolerance_c;
@@ -88,7 +72,7 @@ impl TemperatureLevel {
 
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct TemperatureProfile {
     pub start_time_s: f32,
     pub tolerance_c: f32,

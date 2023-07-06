@@ -19,4 +19,7 @@ impl MashControllerService {
         &self.mash_controller
     }
 
+    pub fn update_mash_controller(&self) {
+        self.mash_controller.update();
+    }
 }

@@ -58,10 +58,6 @@ impl PIDController {
         } 
     }
 
-    pub fn get_mode(&self) -> bool {
-        return self.is_auto_mode;
-    }
-
     pub fn compute(&mut self, input: f32, setpoint: f32, kp: f32, ki: f32, kd: f32) -> Result<f32> {
         if !self.is_auto_mode {
             return Err(BrewtoothError::ControlError("PID Controller is manual".to_string()));

@@ -33,6 +33,7 @@ async fn main() {
 
     // Start thread to regularly update the thermometers
     let thermometer_service_clone = Arc::clone(&thermometer_service);
+    let mash_controller_service_clone = Arc::clone(&mash_controller_service);
     let running_clone = Arc::clone(&running);
     let task = task::spawn(async move {
         // Loop while the web server is running
@@ -41,6 +42,8 @@ async fn main() {
             // let thermometer_service = thermometer_service_clone.lock().await;
     
             thermometer_service_clone.read_temperatures();
+
+            mash_controller_service_clone.update_mash_controller();
         }
     });
 

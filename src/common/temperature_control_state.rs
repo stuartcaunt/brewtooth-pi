@@ -1,8 +1,9 @@
 use std::fmt;
 use std::time::{SystemTime, UNIX_EPOCH};
 use crate::common::TemperatureProfile;
+use serde::Serialize;
 
-#[derive(PartialEq, Eq, Clone)]
+#[derive(PartialEq, Eq, Clone, Serialize)]
 pub enum ControlType {
     Setpoint,
     Profile,
@@ -17,7 +18,7 @@ impl fmt::Display for ControlType {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct TemperatureControlState {
     pub running: bool,
     pub current_time_s: f32,

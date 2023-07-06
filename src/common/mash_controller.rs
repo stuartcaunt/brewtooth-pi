@@ -100,46 +100,8 @@ impl MashController {
         }
     }
 
-    pub fn is_agitator_active(&self) -> bool {
-        let state = self.state.lock().unwrap();
-        state.agitator_active
-    }
-
     pub fn get_temperature(&self) -> f32 {
         self.thermometer_wire.get_temperature()
-    }
-
-    pub fn set_tunings(&self, kp: f32, ki: f32, kd: f32) {
-        let mut pid = self.pid.lock().unwrap();
-
-        pid.kp = kp;
-        pid.ki = ki;
-        pid.kd = kd;
-    }
-
-    pub fn get_kp(&self) -> f32 {
-        let pid = self.pid.lock().unwrap();
-        pid.kp
-    }
-
-    pub fn get_ki(&self) -> f32 {
-        let pid = self.pid.lock().unwrap();
-        pid.ki
-    }
-
-    pub fn get_kd(&self) -> f32 {
-        let pid = self.pid.lock().unwrap();
-        pid.kd
-    }
-
-    pub fn set_output_max(&self, output_max: f32) {
-        let mut pid = self.pid.lock().unwrap();
-        pid.output_max = output_max;
-    }
-
-    pub fn get_output_max(&self) -> f32 {
-        let pid = self.pid.lock().unwrap();
-        pid.output_max
     }
 
     pub fn get_pid_params(&self) -> PIDParams {
