@@ -16,6 +16,10 @@ impl ThermometerWire {
     }
 
     pub fn get_temperature(&self) -> f32 {
+        if self.thermometers.len() == 0 {
+            return 0.0;
+        }
+
         let size = self.thermometers.len() as f32;
         self.thermometers.iter()
             .fold(0.0, |sum, thermometer| sum + thermometer.get_temperature_c()) / size
@@ -26,6 +30,10 @@ impl ThermometerWire {
     }
 
     pub fn read_temperatures(&self) {
+        if self.thermometers.len() == 0 {
+            return;
+        }
+
         println!("Reading temperatures from {} thermometers...", self.thermometers.len());
 
         for thermometer in self.thermometers.iter() {
