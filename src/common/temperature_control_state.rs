@@ -19,6 +19,7 @@ impl fmt::Display for ControlType {
 }
 
 #[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TemperatureControlState {
     pub running: bool,
     pub current_time_s: f32,

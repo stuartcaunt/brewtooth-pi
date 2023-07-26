@@ -3,6 +3,7 @@ use serde::{Serialize, Deserialize};
 use crate::common::PIDParams;
 
 #[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct PIDDto {
     kp: f32,
     ki: f32,

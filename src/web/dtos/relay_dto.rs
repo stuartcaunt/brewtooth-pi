@@ -3,6 +3,7 @@ use serde::Serialize;
 use crate::common::Relay;
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct RelayDto {
     port: u8,
     is_active: bool,

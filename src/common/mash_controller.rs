@@ -242,34 +242,36 @@ impl MashController {
         state.temperature_c = self.get_temperature();
         println!("Got average temperature of {}", state.temperature_c);
 
-        // Shift relay window
-        while (time_ms - timer.window_start_time_ms) > self.window_size_ms {
-            timer.window_start_time_ms += self.window_size_ms;
-        }
-        
-        // Update the profile
-        state.update_temperature_profile();
+        if state.running {
+            // Shift relay window
+            while (time_ms - timer.window_start_time_ms) > self.window_size_ms {
+                timer.window_start_time_ms += self.window_size_ms;
+            }
+            
+            // Update the profile
+            state.update_temperature_profile();
 
-        // Update runtime
-        state.run_time_s = (time_ms - timer.start_time_ms) as f32 * 0.001;
+            // Update runtime
+            state.run_time_s = (time_ms - timer.start_time_ms) as f32 * 0.001;
 
-        // Update temperate control
-        let temperature_controller_option = &mut *(self.temperature_controller.lock().unwrap());
-        if let Some(temperature_controller) = temperature_controller_option {
+            // Update temperate control
+            let temperature_controller_option = &mut *(self.temperature_controller.lock().unwrap());
+            if let Some(temperature_controller) = temperature_controller_option {
 
-            let pid = self.pid.lock().unwrap();
-            if let Ok(output) = temperature_controller.compute(state.temperature_c, state.setpoint_c, pid.kp, pid.ki, pid.kd) {
-                state.controller_output = output;
+                let pid = self.pid.lock().unwrap();
+                if let Ok(output) = temperature_controller.compute(state.temperature_c, state.setpoint_c, pid.kp, pid.ki, pid.kd) {
+                    state.controller_output = output;
 
-                // Activate heater depending on controller output
-                let window_factor = (time_ms - timer.window_start_time_ms) as f32 / self.window_size_ms as f32;
-                let output_factor = state.controller_output as f32 / pid.output_max as f32;
+                    // Activate heater depending on controller output
+                    let window_factor = (time_ms - timer.window_start_time_ms) as f32 / self.window_size_ms as f32;
+                    let output_factor = state.controller_output as f32 / pid.output_max as f32;
 
-                let active_heater = output_factor >= window_factor;
+                    let active_heater = output_factor >= window_factor;
 
-                if self.is_heater_active() != active_heater {
-                    println!("{} : Changing heater state to {}, wf = {}, of = {}", state.run_time_s, active_heater, window_factor * 100.0, output_factor * 100.0);
-                    self.set_heater_active(active_heater);
+                    if self.is_heater_active() != active_heater {
+                        println!("{} : Changing heater state to {}, wf = {}, of = {}", state.run_time_s, active_heater, window_factor * 100.0, output_factor * 100.0);
+                        self.set_heater_active(active_heater);
+                    }
                 }
             }
         }

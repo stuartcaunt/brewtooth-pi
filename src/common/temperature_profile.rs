@@ -8,6 +8,7 @@ pub enum ProfileState {
 }
 
 #[derive(Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TemperatureLevel {
     pub name: String,
     pub setpoint_c: f32,
@@ -73,6 +74,7 @@ impl TemperatureLevel {
 }
 
 #[derive(Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TemperatureProfile {
     pub start_time_s: f32,
     pub tolerance_c: f32,

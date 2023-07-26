@@ -4,6 +4,7 @@ use crate::common::MashController;
 use crate::web::dtos::{RelayDto, PIDDto, ThermometerWireDto};
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct MashControllerDto {
     heater: RelayDto,
     agitator: RelayDto,
