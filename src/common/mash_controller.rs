@@ -52,6 +52,10 @@ impl MashController {
             temperature_controller: Arc::new(Mutex::new(None)),
             state: Arc::new(Mutex::new(TemperatureControlState {
                 sample_time_ms: ((mash_controller_config.window_size_ms as f32) * WINDOW_SAMPLE_TIME_RATIO) as u32,
+                kp: mash_controller_config.pid.kp,
+                ki: mash_controller_config.pid.ki,
+                kd: mash_controller_config.pid.kd,
+                output_max: mash_controller_config.pid.output_max,
                 ..TemperatureControlState::defaults()
             })),
             timer: Arc::new(Mutex::new(ControllerTimer::new())),
@@ -111,10 +115,16 @@ impl MashController {
 
     pub fn set_pid_params(&self, pid_params: &PIDParams) -> PIDParams {
         let mut pid = self.pid.lock().unwrap();
+        let mut state = self.state.lock().unwrap();
         pid.kp = pid_params.kp;
         pid.ki = pid_params.ki;
         pid.kd = pid_params.kd;
         pid.output_max = pid_params.output_max;
+
+        state.kp = pid_params.kp;
+        state.ki = pid_params.ki;
+        state.kd = pid_params.kd;
+        state.output_max = pid_params.output_max;
 
         self.get_pid_params()
     }

@@ -34,6 +34,10 @@ pub struct TemperatureControlState {
     pub auto_temperature_control: bool,
     pub loop_ms: u32,
     pub sample_time_ms: u32,
+    pub kp: f32,
+    pub ki: f32,
+    pub kd: f32,
+    pub output_max: f32,
 }
 
 impl TemperatureControlState {
@@ -52,6 +56,10 @@ impl TemperatureControlState {
             auto_temperature_control: false,
             loop_ms: 0,
             sample_time_ms: 0,
+            kp: 0.0,
+            ki: 0.0,
+            kd: 0.0,
+            output_max: 0.0,
         }
     }
 
