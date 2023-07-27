@@ -34,16 +34,23 @@ async fn main() {
     // Start thread to regularly update the thermometers
     let thermometer_service_clone = Arc::clone(&thermometer_service);
     let mash_controller_service_clone = Arc::clone(&mash_controller_service);
-    let running_clone = Arc::clone(&running);
-    let task = task::spawn(async move {
+    let temperature_running_clone = Arc::clone(&running);
+    let controller_running_clone = Arc::clone(&running);
+    let temperature_read_task = task::spawn(async move {
         // Loop while the web server is running
-        while *running_clone.lock().unwrap() {
-            thread::sleep(time::Duration::from_millis(1000));
-            // let thermometer_service = thermometer_service_clone.lock().await;
-    
+        while *temperature_running_clone.lock().unwrap() {
             thermometer_service_clone.read_temperatures();
 
+            thread::sleep(time::Duration::from_millis(5000));
+        }
+    });
+
+    let controller_update_task = task::spawn(async move {
+        // Loop while the web server is running
+        while *controller_running_clone.lock().unwrap() {
             mash_controller_service_clone.update_mash_controller();
+
+            thread::sleep(time::Duration::from_millis(500));
         }
     });
 
@@ -51,5 +58,6 @@ async fn main() {
     server.start(configuration, thermometer_service, mash_controller_service).await;
 
     *running.lock().unwrap() = false;
-    let _ = tokio::join!(task);
+    let _ = tokio::join!(temperature_read_task);
+    let _ = tokio::join!(controller_update_task);
 }

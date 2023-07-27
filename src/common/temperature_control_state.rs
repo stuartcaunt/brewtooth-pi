@@ -65,7 +65,7 @@ impl TemperatureControlState {
 
     pub fn start_temperature_profile(&mut self) {
         if self.control_type == ControlType::Profile {
-            let time_s = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs_f32();
+            let time_s = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
             self.setpoint_c = self.temperature_profile.start(time_s, self.temperature_c);
         }
     }
@@ -78,14 +78,14 @@ impl TemperatureControlState {
 
     pub fn update_temperature_profile(&mut self) {
         if self.running && self.control_type == ControlType::Profile {
-            let time_s = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs_f32();
+            let time_s = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
             self.setpoint_c = self.temperature_profile.update(time_s, self.temperature_c);
         }
     }
 
     pub fn start_temperature_profile_pending_level(&mut self) {
         if self.running && self.control_type == ControlType::Profile {
-            let time_s = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs_f32();
+            let time_s = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
 
             self.temperature_profile.start_pending_level(time_s, self.temperature_c);
         }
@@ -93,7 +93,7 @@ impl TemperatureControlState {
 
     pub fn terminate_temperature_profile_current_level(&mut self) {
         if self.running && self.control_type == ControlType::Profile {
-            let time_s = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs_f32();
+            let time_s = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
 
             self.temperature_profile.terminate_current_level(time_s, self.temperature_c);
         }

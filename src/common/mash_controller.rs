@@ -81,13 +81,8 @@ impl MashController {
             self.heater.set_active(active);
 
             let mut state = self.state.lock().unwrap();
-            state.heater_active = true;
+            state.heater_active = active;
         }
-    }
-
-    pub fn is_heater_active(&self) -> bool {
-        let state = self.state.lock().unwrap();
-        state.heater_active
     }
 
     pub fn get_agitator(&self) -> &Relay {
@@ -100,7 +95,7 @@ impl MashController {
             self.agitator.set_active(active);
 
             let mut state = self.state.lock().unwrap();
-            state.agitator_active = true;
+            state.agitator_active = active;
         }
     }
 
@@ -156,10 +151,12 @@ impl MashController {
 
     pub fn start_temperature_control(&self, control_type: ControlType) {
 
-        let mut temperature_controller_option = self.temperature_controller.lock().unwrap();
-        if !temperature_controller_option.is_none() {
-            println!("Temperature control is already active");
-            return;
+        {
+            let temperature_controller_option = self.temperature_controller.lock().unwrap();
+            if !temperature_controller_option.is_none() {
+                println!("Temperature control is already active");
+                return;
+            }
         }
 
         // create temperature controller
@@ -181,6 +178,8 @@ impl MashController {
             let pid = self.pid.lock().unwrap();
             temperature_controller.set_output_limits(0.0, pid.output_max);
             temperature_controller.set_sample_time_ms(state.sample_time_ms);
+
+            let mut temperature_controller_option = self.temperature_controller.lock().unwrap();
             *temperature_controller_option = Some(temperature_controller);
 
             let mut timer = self.timer.lock().unwrap();
@@ -250,7 +249,7 @@ impl MashController {
 
         // Get mean temperature from thermometer wires
         state.temperature_c = self.get_temperature();
-        println!("Got average temperature of {}", state.temperature_c);
+        // println!("Got average temperature of {}", state.temperature_c);
 
         if state.running {
             // Shift relay window
@@ -278,9 +277,11 @@ impl MashController {
 
                     let active_heater = output_factor >= window_factor;
 
-                    if self.is_heater_active() != active_heater {
+                    if self.heater.is_active() != active_heater {
                         println!("{} : Changing heater state to {}, wf = {}, of = {}", state.run_time_s, active_heater, window_factor * 100.0, output_factor * 100.0);
-                        self.set_heater_active(active_heater);
+
+                        self.heater.set_active(active_heater);
+                        state.heater_active = active_heater;
                     }
                 }
             }

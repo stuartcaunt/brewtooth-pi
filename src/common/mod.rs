@@ -6,7 +6,7 @@ pub use relay::Relay;
 pub use mash_controller::MashController;
 pub use pid_params::PIDParams;
 pub use temperature_control_state::{TemperatureControlState, ControlType};
-pub use temperature_profile::{TemperatureLevel, TemperatureProfile};
+pub use temperature_profile::{TemperatureLevel, TemperatureProfile, ProfileState};
 pub use pid_controller::PIDController;
 
 pub static W1_PATH_PREFIX: &str = "/sys/bus/w1/devices";

@@ -9,6 +9,7 @@ use crate::web::dtos::{
     PIDDto, 
     ThermometerWireDto,
     RelayDto,
+    TemperatureProfileInput,
 };
 
 pub struct MashControllerController {
@@ -156,12 +157,12 @@ impl MashControllerController {
         Json(state)
     }
 
-    pub async fn start_temperature_control_with_profile(Extension(context): Extension<WebContext>, Json(temperature_profile): Json<TemperatureProfile>) -> Json<TemperatureControlState> {
+    pub async fn start_temperature_control_with_profile(Extension(context): Extension<WebContext>, Json(temperature_profile_input): Json<TemperatureProfileInput>) -> Json<TemperatureControlState> {
         let mash_controller_service = context.mash_controller_service;
 
         let mash_controller = mash_controller_service.get_mash_controller();
 
-        mash_controller.set_temperature_profile(temperature_profile);
+        mash_controller.set_temperature_profile(temperature_profile_input.into());
         mash_controller.start_temperature_control(ControlType::Profile);
 
         let state = mash_controller.get_temperature_control_state();

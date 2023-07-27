@@ -36,12 +36,29 @@ impl PIDController {
     }
 
     pub fn set_output_limits(&mut self, output_min: f32, output_max: f32) {
-        if output_min < output_max {
+        if output_min >= output_max {
             return;
         }
 
         self.output_min = output_min;
         self.output_max = output_max;
+
+        if self.is_auto_mode {
+            if self.last_output > output_max {
+                self.last_output = output_max;
+            
+            } else if self.last_output < output_min {
+                self.last_output = output_min
+            }
+            
+            if self.i_term > output_max {
+                self.i_term = output_max;
+            
+            } else if self.i_term < output_min {
+                self.i_term = output_min
+            }
+
+        }
     }
 
     pub fn set_auto_mode(&mut self, is_auto_mode: bool) {
@@ -71,7 +88,7 @@ impl PIDController {
         let time_change_ms = (now_ms - self.last_time_ms) as u32;
 
         if time_change_ms < self.sample_time_ms {
-            println!("Insufficient time since last control call");
+            // println!("Insufficient time since last control call");
             return Ok(self.last_output);
         }
 

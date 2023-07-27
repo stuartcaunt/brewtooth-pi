@@ -31,7 +31,7 @@ impl MashControllerRouter {
             .route("/setpoint/:setpoint_c", post(MashControllerController::set_temperature_control_setpoint))
             .route("/setpoint", get(MashControllerController::get_temperature_control_setpoint))
             .route("/profile", get(MashControllerController::get_temperature_profile))
-            .route("/profile/start", get(MashControllerController::start_temperature_profile_level))
-            .route("/profile/skip", get(MashControllerController::skip_temperature_profile_level))
+            .route("/profile/start", post(MashControllerController::start_temperature_profile_level))
+            .route("/profile/skip", post(MashControllerController::skip_temperature_profile_level))
     }
 }
