@@ -38,6 +38,7 @@ pub struct TemperatureControlState {
     pub ki: f32,
     pub kd: f32,
     pub output_max: f32,
+    pub last_history_update_time_s: u64,
 }
 
 impl TemperatureControlState {
@@ -60,6 +61,7 @@ impl TemperatureControlState {
             ki: 0.0,
             kd: 0.0,
             output_max: 0.0,
+            last_history_update_time_s: 0,
         }
     }
 

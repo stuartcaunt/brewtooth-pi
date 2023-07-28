@@ -28,6 +28,7 @@ async fn main() {
     });
 
     let thermometer_service = Arc::new(thermometer_service);
+    thermometer_service.read_temperatures();
     let mash_controller_service = Arc::new(mash_controller_service);
     let running = Arc::new(std::sync::Mutex::new(true));
 

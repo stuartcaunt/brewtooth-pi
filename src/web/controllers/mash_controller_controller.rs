@@ -3,7 +3,12 @@ use axum::{
 };
 
 use crate::web::*;
-use crate::common::{TemperatureControlState, ControlType, TemperatureProfile};
+use crate::common::{
+    TemperatureControlState, 
+    ControlType, 
+    TemperatureProfile, 
+    StateHistory
+};
 use crate::web::dtos::{
     MashControllerDto, 
     PIDDto, 
@@ -260,6 +265,16 @@ impl MashControllerController {
         let state = mash_controller.get_temperature_control_state();
 
         Json(state)
+    }
+
+    pub async fn get_state_history(Extension(context): Extension<WebContext>) -> Json<Vec<StateHistory>> {
+        let mash_controller_service = context.mash_controller_service;
+
+        let mash_controller = mash_controller_service.get_mash_controller();
+
+        let state_history = mash_controller.get_state_history();
+
+        Json(state_history)
     }
 
 }

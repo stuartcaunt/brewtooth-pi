@@ -33,5 +33,6 @@ impl MashControllerRouter {
             .route("/profile", get(MashControllerController::get_temperature_profile))
             .route("/profile/start", post(MashControllerController::start_temperature_profile_level))
             .route("/profile/skip", post(MashControllerController::skip_temperature_profile_level))
+            .route("/history", get(MashControllerController::get_state_history))
     }
 }

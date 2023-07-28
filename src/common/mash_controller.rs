@@ -11,9 +11,11 @@ use crate::common::{
     TemperatureControlState,
     TemperatureProfile,
     PIDController,
+    StateHistory,
 };
 
 const WINDOW_SAMPLE_TIME_RATIO: u64 = 4;
+const HISTORY_UPDATE_PERIOD_S: u64 = 10;
 
 struct ControllerTimer {
     last_time_ms: u64,
@@ -40,6 +42,7 @@ pub struct MashController {
     state: Arc<Mutex<TemperatureControlState>>,
     timer: Arc<Mutex<ControllerTimer>>,
     window_size_ms: u64,
+    state_history: Arc<Mutex<Vec<StateHistory>>>,
 }
 
 impl MashController {
@@ -60,6 +63,7 @@ impl MashController {
             })),
             timer: Arc::new(Mutex::new(ControllerTimer::new())),
             window_size_ms: mash_controller_config.window_size_ms,
+            state_history: Arc::new(Mutex::new(Vec::new())),
         })
     }
 
@@ -287,12 +291,19 @@ impl MashController {
             }
         }
 
-        // Write data to file
-        // this->writeHistoryToFile();
+        // Update history
+        if state.last_history_update_time_s + HISTORY_UPDATE_PERIOD_S < state.current_time_s {
+            let mut state_history = self.state_history.lock().unwrap();
+            state_history.push(StateHistory::new(&state));
+            state.last_history_update_time_s = state.current_time_s;
+        }
     }
           
-    // const String & getHistoryFileName() const {
-    //     return _historyFileName;
-    // }
+
+    pub fn get_state_history(&self) -> Vec<StateHistory> {
+        let state_history = self.state_history.lock().unwrap();
+
+        state_history.clone()
+    }
 
 }
