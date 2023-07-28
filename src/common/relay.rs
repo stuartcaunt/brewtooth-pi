@@ -10,7 +10,9 @@ pub struct Relay {
 impl Relay {
     pub fn new(port: u8) -> Result<Self> {
         // Verify port
-        let pin = Relay::get_pin(port)?;
+        let mut pin = Relay::get_pin(port)?;
+        
+        pin.set_low();
 
         Ok(Self {
             port: port,
