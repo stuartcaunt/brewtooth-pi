@@ -22,8 +22,8 @@ impl fmt::Display for ControlType {
 #[serde(rename_all = "camelCase")]
 pub struct TemperatureControlState {
     pub running: bool,
-    pub current_time_s: f32,
-    pub run_time_s: f32,
+    pub current_time_s: u64,
+    pub run_time_s: u64,
     pub temperature_c: f32,
     pub setpoint_c: f32,
     pub control_type: ControlType,
@@ -32,8 +32,8 @@ pub struct TemperatureControlState {
     pub heater_active: bool,
     pub agitator_active: bool,
     pub auto_temperature_control: bool,
-    pub loop_ms: u32,
-    pub sample_time_ms: u32,
+    pub loop_ms: u64,
+    pub sample_time_ms: u64,
     pub kp: f32,
     pub ki: f32,
     pub kd: f32,
@@ -44,8 +44,8 @@ impl TemperatureControlState {
     pub fn defaults() -> TemperatureControlState {
         TemperatureControlState {
             running: false,
-            current_time_s: 0.0,
-            run_time_s: 0.0,
+            current_time_s: 0,
+            run_time_s: 0,
             temperature_c: 0.0,
             setpoint_c: 0.0,
             control_type: ControlType::Setpoint,

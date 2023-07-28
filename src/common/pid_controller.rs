@@ -8,7 +8,7 @@ pub struct PIDController {
     last_time_ms: u64,
     last_inputs: Vec<f32>,
     last_output: f32,
-    sample_time_ms: u32,
+    sample_time_ms: u64,
     output_min: f32,
     output_max: f32,
     i_term: f32,
@@ -31,7 +31,7 @@ impl PIDController {
         }
     }
 
-    pub fn set_sample_time_ms(&mut self, sample_time_ms: u32) {
+    pub fn set_sample_time_ms(&mut self, sample_time_ms: u64) {
         self.sample_time_ms = sample_time_ms;
     }
 
@@ -85,7 +85,7 @@ impl PIDController {
         }
 
         let now_ms = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64;
-        let time_change_ms = (now_ms - self.last_time_ms) as u32;
+        let time_change_ms = now_ms - self.last_time_ms;
 
         if time_change_ms < self.sample_time_ms {
             // println!("Insufficient time since last control call");

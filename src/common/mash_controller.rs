@@ -13,7 +13,7 @@ use crate::common::{
     PIDController,
 };
 
-const WINDOW_SAMPLE_TIME_RATIO: f32 = 0.25;
+const WINDOW_SAMPLE_TIME_RATIO: u64 = 4;
 
 struct ControllerTimer {
     last_time_ms: u64,
@@ -51,7 +51,7 @@ impl MashController {
             pid: Arc::new(Mutex::new(PIDParams::new(&mash_controller_config.pid))),
             temperature_controller: Arc::new(Mutex::new(None)),
             state: Arc::new(Mutex::new(TemperatureControlState {
-                sample_time_ms: ((mash_controller_config.window_size_ms as f32) * WINDOW_SAMPLE_TIME_RATIO) as u32,
+                sample_time_ms: mash_controller_config.window_size_ms / WINDOW_SAMPLE_TIME_RATIO,
                 kp: mash_controller_config.pid.kp,
                 ki: mash_controller_config.pid.ki,
                 kd: mash_controller_config.pid.kd,
@@ -166,8 +166,8 @@ impl MashController {
             let now_ms = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64;
             let mut state = self.state.lock().unwrap();
             state.running = true;
-            state.current_time_s = (now_ms / 1000) as f32;
-            state.run_time_s = 0.0;
+            state.current_time_s = now_ms / 1000;
+            state.run_time_s = 0;
             state.temperature_c = self.get_temperature();
             state.control_type = control_type;
             state.controller_output = 0.0;
@@ -205,7 +205,7 @@ impl MashController {
 
             state.controller_output = 0.0;
             state.running = false;
-            state.run_time_s = 0.0;
+            state.run_time_s = 0;
     
             // stop the profile
             state.stop_temperature_profile();
@@ -242,10 +242,10 @@ impl MashController {
         // Update loop timing
         let time_ms = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64;
 
-        state.loop_ms = (time_ms - timer.last_time_ms) as u32;
+        state.loop_ms = time_ms - timer.last_time_ms;
         timer.last_time_ms = time_ms;
 
-        state.current_time_s = (time_ms / 1000) as f32;
+        state.current_time_s = time_ms / 1000;
 
         // Get mean temperature from thermometer wires
         state.temperature_c = self.get_temperature();
@@ -261,7 +261,7 @@ impl MashController {
             state.update_temperature_profile();
 
             // Update runtime
-            state.run_time_s = (time_ms - timer.start_time_ms) as f32 * 0.001;
+            state.run_time_s = (time_ms - timer.start_time_ms) / 1000;
 
             // Update temperate control
             let temperature_controller_option = &mut *(self.temperature_controller.lock().unwrap());

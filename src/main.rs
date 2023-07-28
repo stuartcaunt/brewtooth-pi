@@ -41,7 +41,7 @@ async fn main() {
         while *temperature_running_clone.lock().unwrap() {
             thermometer_service_clone.read_temperatures();
 
-            thread::sleep(time::Duration::from_millis(5000));
+            thread::sleep(time::Duration::from_millis(500));
         }
     });
 
