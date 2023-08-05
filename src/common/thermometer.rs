@@ -35,14 +35,16 @@ impl Thermometer {
         *temperature = value;
     }
 
-    pub fn read_temperature(&self) -> Result<()> {
+    pub fn read_temperature(&self) -> Result<f32> {
         let mut path = PathBuf::from(W1_PATH_PREFIX);
         path.push(&self.id);
         path.push("temperature");
         let temperature_string = fs::read_to_string(path)?;
         let temperature = temperature_string.trim().parse::<u32>()?;
 
-        self.set_temperature_c(0.001 * (temperature as f32));
-        Ok(())
+        let temperature = 0.001 * (temperature as f32);
+
+        self.set_temperature_c(temperature);
+        Ok(temperature)
     }
 }

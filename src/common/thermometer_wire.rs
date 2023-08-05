@@ -36,12 +36,18 @@ impl ThermometerWire {
 
         println!("Reading temperatures from {} thermometers...", self.thermometers.len());
 
+        let mut temperatures = Vec::new();
         for thermometer in self.thermometers.iter() {
-            thermometer.read_temperature().unwrap_or_else(|error| {
+            let temperature = thermometer.read_temperature().unwrap_or_else(|error| {
                 println!("Failed to read temperature from thermometer {}: {}", thermometer.get_id(), error);
+                return 0.0;
             });
+            if temperature > 0.0 {
+                temperatures.push(temperature)
+            }
         }
-        println!("... finished reading");
+        let temperature_string = temperatures.into_iter().map(|temperature| temperature.to_string()).collect::<Vec<String>>().join(", ");
+        println!("... finished reading: [{}]", temperature_string);
     }
 
     fn search() -> Result<Vec<Thermometer>> {
